@@ -16,7 +16,7 @@ Part of the **[Wick suite](../WickSuite)** — three precision addons built arou
 
 ## Install
 
-- **CurseForge:** search for "Wick's Trade Hall".
+- **CurseForge:** [curseforge.com/wow/addons/trade-hall](https://www.curseforge.com/wow/addons/trade-hall)
 - **Manual:** drop the `WicksTradeHall` folder into `World of Warcraft\_classic_\Interface\AddOns\`.
 
 ## Usage

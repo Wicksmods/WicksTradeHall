@@ -1,0 +1,13 @@
+## Interface: 20505
+## Title: Wick's Trade Hall
+## Notes: Trade channel scanner and bulletin board
+## Author: Wick
+## Version: 1.0.2
+## SavedVariables: WicksTradeHallDB
+
+Core.lua
+Categories.lua
+Scanner.lua
+Minimap.lua
+UI.lua
+Options.lua

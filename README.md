@@ -6,6 +6,14 @@
 
 Part of the **[Wick suite](https://github.com/jspliff/WickSuite)** — three precision addons built around a single fel-green-on-deep-purple aesthetic.
 
+<!-- wick:suite-table:start -->
+| Addon | GitHub | CurseForge |
+|---|---|---|
+| **Wick's TBC BIS Tracker** | [repo](https://github.com/jspliff/WickidsTBCBISTracker) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-tbc-bis-tracker) |
+| **Wick's CD Tracker** | [repo](https://github.com/jspliff/WicksCDTracker) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-cd-tracker) |
+| **Wick's Trade Hall** | [repo](https://github.com/jspliff/WicksTradeHall) | [CurseForge](https://www.curseforge.com/wow/addons/trade-hall) |
+<!-- wick:suite-table:end -->
+
 ## Features
 
 - **Reads Trade channel** and classifies every message into one of seven categories: **WTS · WTB · WTT · ENCHANT · CRAFT · TRAVEL · MISC**.

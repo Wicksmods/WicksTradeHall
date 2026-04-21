@@ -1,8 +1,10 @@
+<p align="center"><img src="images/wick-thumb-trade.png" alt="Wick's Trade Hall"></p>
+
 # Wick's Trade Hall
 
 > Trade channel, as a bulletin board. Seven categories, aged-out listings, no wall-of-spam.
 
-Part of the **[Wick suite](../WickSuite)** — three precision addons built around a single fel-green-on-deep-purple aesthetic.
+Part of the **[Wick suite](https://github.com/jspliff/WickSuite)** — three precision addons built around a single fel-green-on-deep-purple aesthetic.
 
 ## Features
 

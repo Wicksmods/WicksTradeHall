@@ -13,6 +13,7 @@ Part of the **[Wick suite](https://github.com/jspliff/WickSuite)** — three pre
 | **Wick's CD Tracker** | [repo](https://github.com/jspliff/WicksCDTracker) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-cd-tracker) |
 | **Wick's Trade Hall** | [repo](https://github.com/jspliff/WicksTradeHall) | [CurseForge](https://www.curseforge.com/wow/addons/trade-hall) |
 | **Wick's Macro Builder** | [repo](https://github.com/jspliff/WicksMacroBuilder) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-macro-builder) |
+| **Wick's Combat Log** | [repo](https://github.com/jspliff/WicksCombatLog) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-combat-log) |
 <!-- wick:suite-table:end -->
 
 ## Features

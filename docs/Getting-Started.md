@@ -3,7 +3,7 @@
 ## Install
 
 - **CurseForge client** — search for "Wick's Trade Hall".
-- **Manual** — download the latest ZIP from [CurseForge](https://www.curseforge.com/wow/addons/trade-hall) or [GitHub Releases](https://github.com/jspliff/WicksTradeHall/releases), extract the `WicksTradeHall` folder into `World of Warcraft\_classic_\Interface\AddOns\`.
+- **Manual** — download the latest ZIP from [CurseForge](https://www.curseforge.com/wow/addons/trade-hall) or [GitHub Releases](https://github.com/Wicksmods/WicksTradeHall/releases), extract the `WicksTradeHall` folder into `World of Warcraft\_classic_\Interface\AddOns\`.
 
 ## First run
 

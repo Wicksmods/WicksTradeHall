@@ -1,5 +1,13 @@
 # Wick's Trade Hall — Changelog
 
+## 1.0.3 — 2026-04-25
+
+### Title bar harmonization
+
+Header now matches the canonical Wick suite spec — 32px tall, two-tone title (`Wick's` in fel-green, `Trade Hall` in cream, FRIZQT 14 outlined), bordered ✕ close button, fel-green underline at the bottom of the header. Listing count and a `…` menu button now live in the header right side, between the title and the close button.
+
+No functional changes.
+
 ## 1.0.2 — 2026-04-21
 
 ### Brand identity pass

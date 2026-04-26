@@ -2,7 +2,7 @@
 ## Title: Wick's Trade Hall
 ## Notes: Trade channel scanner and bulletin board
 ## Author: Wick
-## Version: 1.0.2
+## Version: 1.0.3
 ## SavedVariables: WicksTradeHallDB
 
 Core.lua

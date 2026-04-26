@@ -24,6 +24,7 @@ local C_ROW_HOVER   = { 0.310, 0.780, 0.471, 0.06 }
 local FONT = "Fonts\\FRIZQT__.TTF"
 local ROW_HEIGHT = 36
 local VISIBLE_ROWS = 10
+local HEADER_H = 32
 local MIN_WIDTH, MIN_HEIGHT = 440, 300
 local MAX_WIDTH, MAX_HEIGHT = 800, 700
 
@@ -308,39 +309,86 @@ local function CreatePanel()
     local header = CreateFrame("Frame", nil, panel)
     header:SetPoint("TOPLEFT", panel, "TOPLEFT", 1, -1)
     header:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -1, -1)
-    header:SetHeight(34)
+    header:SetHeight(HEADER_H)
 
     local headerBG = NewTexture(header, "BACKGROUND", C_HEADER_BG)
     headerBG:SetAllPoints()
 
-    -- Title
-    local title = NewText(header, 14, C_GREEN[1], C_GREEN[2], C_GREEN[3])
-    title:SetFont(FONT, 15, "OUTLINE")
-    title:SetPoint("LEFT", 12, 0)
-    title:SetText("Wick's Trade Hall")
+    -- Green underline on header
+    local headerLine = NewTexture(header, "BORDER")
+    headerLine:SetColorTexture(C_GREEN[1], C_GREEN[2], C_GREEN[3], 0.35)
+    headerLine:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", 40, 0)
+    headerLine:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -40, 0)
+    headerLine:SetHeight(1)
 
-    -- Accent line under header
-    local accent = NewTexture(header, "ARTWORK", { C_GREEN[1], C_GREEN[2], C_GREEN[3], 0.35 })
-    accent:SetPoint("BOTTOMLEFT", 40, 0)
-    accent:SetPoint("BOTTOMRIGHT", -40, 0)
-    accent:SetHeight(1)
+    -- Header bottom border
+    local headerBotBorder = NewTexture(header, "BORDER", { C_BORDER[1], C_BORDER[2], C_BORDER[3], 1 })
+    headerBotBorder:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", 0, 0)
+    headerBotBorder:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
+    headerBotBorder:SetHeight(1)
+
+    -- Title (two-tone)
+    local title = header:CreateFontString(nil, "OVERLAY")
+    title:SetFont(FONT, 14, "OUTLINE")
+    title:SetText("|cff4FC778Wick's|r |cffD4C8A1Trade Hall|r")
+    title:SetPoint("LEFT", header, "LEFT", 12, 0)
 
     -- Close button
     local closeBtn = CreateFrame("Button", nil, header)
     closeBtn:SetSize(16, 16)
-    closeBtn:SetPoint("TOPRIGHT", -8, -9)
-    local closeText = NewText(closeBtn, 12, 0.6, 0.5, 0.7)
-    closeText:SetFont(FONT, 14, "OUTLINE")
-    closeText:SetText("X")
+    closeBtn:SetPoint("RIGHT", header, "RIGHT", -8, 0)
+
+    local closeBG = NewTexture(closeBtn, "BACKGROUND", C_HEADER_BG)
+    closeBG:SetAllPoints()
+    AddBorder(closeBtn, C_BORDER[1], C_BORDER[2], C_BORDER[3], C_BORDER[4])
+
+    local closeText = closeBtn:CreateFontString(nil, "OVERLAY")
+    closeText:SetFont(FONT, 9, "")
+    closeText:SetText("✕")
+    closeText:SetTextColor(C_TEXT_DIM[1], C_TEXT_DIM[2], C_TEXT_DIM[3], 1)
     closeText:SetAllPoints()
-    closeBtn:SetScript("OnEnter", function() closeText:SetTextColor(1, 0.3, 0.3) end)
-    closeBtn:SetScript("OnLeave", function() closeText:SetTextColor(0.6, 0.5, 0.7) end)
+    closeText:SetJustifyH("CENTER")
+    closeText:SetJustifyV("MIDDLE")
+    closeBtn:SetScript("OnEnter", function() closeText:SetTextColor(1, 0.3, 0.3, 1) end)
+    closeBtn:SetScript("OnLeave", function() closeText:SetTextColor(C_TEXT_DIM[1], C_TEXT_DIM[2], C_TEXT_DIM[3], 1) end)
     closeBtn:SetScript("OnClick", function() panel:Hide() end)
 
-    -- Listing count
+    -- "..." menu button (opens options)
+    local menuBtn = CreateFrame("Button", nil, header)
+    menuBtn:SetSize(16, 16)
+    menuBtn:SetPoint("RIGHT", closeBtn, "LEFT", -12, 0)
+
+    local menuBG = NewTexture(menuBtn, "BACKGROUND", C_HEADER_BG)
+    menuBG:SetAllPoints()
+    AddBorder(menuBtn, C_BORDER[1], C_BORDER[2], C_BORDER[3], C_BORDER[4])
+
+    local menuText = menuBtn:CreateFontString(nil, "OVERLAY")
+    menuText:SetFont(FONT, 12, "OUTLINE")
+    menuText:SetText("…")
+    menuText:SetTextColor(C_TEXT_DIM[1], C_TEXT_DIM[2], C_TEXT_DIM[3], 1)
+    menuText:SetAllPoints()
+    menuText:SetJustifyH("CENTER")
+    menuText:SetJustifyV("MIDDLE")
+    menuBtn:SetScript("OnEnter", function() menuText:SetTextColor(C_GREEN[1], C_GREEN[2], C_GREEN[3], 1) end)
+    menuBtn:SetScript("OnLeave", function() menuText:SetTextColor(C_TEXT_DIM[1], C_TEXT_DIM[2], C_TEXT_DIM[3], 1) end)
+    menuBtn:SetScript("OnClick", function()
+        if WTH.ToggleOptions then WTH.ToggleOptions() end
+    end)
+
+    -- Listing count (sits left of the menu button)
     local countText = NewText(header, 9, C_TEXT_DIM[1], C_TEXT_DIM[2], C_TEXT_DIM[3])
-    countText:SetPoint("RIGHT", closeBtn, "LEFT", -10, 0)
+    countText:SetPoint("RIGHT", menuBtn, "LEFT", -12, 0)
     panel.countText = countText
+
+    -- Make header draggable too
+    header:EnableMouse(true)
+    header:RegisterForDrag("LeftButton")
+    header:SetScript("OnDragStart", function() panel:StartMoving() end)
+    header:SetScript("OnDragStop", function()
+        panel:StopMovingOrSizing()
+        local point, _, relPoint, x, y = panel:GetPoint()
+        WTH.config.windowPoint = { point = point, relPoint = relPoint, x = x, y = y }
+    end)
 
     -------------------------------------------------------------------
     -- Filter bar (category toggles)

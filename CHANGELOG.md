@@ -1,5 +1,15 @@
 # Wick's Trade Hall — Changelog
 
+## 1.0.4 — 2026-04-26
+
+### Title bar slim revert + close-button glyph fix
+
+Reverted the heavier 32px header from 1.0.3 back to the slim CD-Tracker chrome that the suite shipped pre-harmonization — 22px tall, FRIZQT 12 (no outline), plain `×` close button, drop the fel-green underline. Kept the two-tone title color (`Wick's` in fel-green, `Trade Hall` in cream) since that's the part of the 1.0.3 work that worked. Listing count stays in the header to the left of the close button. The header `…` menu button has been removed (Options is still reachable from the status bar at the bottom of the panel).
+
+Also: the previous `✕` (U+2715) close glyph was rendering as a tofu/missing-glyph box in `Fonts\FRIZQT__.TTF`. Swapped to `×` (U+00D7) which renders cleanly. This is the visible bug fix users will notice most.
+
+No functional changes.
+
 ## 1.0.3 — 2026-04-25
 
 ### Title bar harmonization

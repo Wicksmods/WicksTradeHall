@@ -14,7 +14,7 @@ Part of the **[Wick suite](https://github.com/Wicksmods/WickSuite)** — three p
 | **Wick's Trade Hall** | [repo](https://github.com/Wicksmods/WicksTradeHall) | [CurseForge](https://www.curseforge.com/wow/addons/trade-hall) |
 | **Wick's Macro Builder** | [repo](https://github.com/Wicksmods/WicksMacroBuilder) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-macro-builder) |
 | **Wick's Combat Log** | [repo](https://github.com/Wicksmods/WicksCombatLog) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-combat-log) |
-| **Wick's UI** | [repo](https://github.com/Wicksmods/WicksUI) | *(ElvUI plugin — pending)* |
+| **Wick's Stats** | [repo](https://github.com/Wicksmods/WicksStats) | [CurseForge](https://www.curseforge.com/wow/addons/wicks-stats) |
 <!-- wick:suite-table:end -->
 
 ## Features

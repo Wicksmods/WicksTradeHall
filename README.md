@@ -4,7 +4,7 @@
 
 > Trade channel, as a bulletin board. Seven categories, aged-out listings, no wall-of-spam.
 
-Part of the **[Wick suite](https://github.com/Wicksmods/WickSuite)**: seven precision addons built around a single fel-green-on-deep-purple aesthetic.
+Part of the **[Wick suite](https://github.com/Wicksmods/WickSuite)**: precision addons built around a single fel-green-on-deep-purple aesthetic.
 
 <!-- wick:suite-table:start -->
 | Addon | GitHub | CurseForge |

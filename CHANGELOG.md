@@ -1,6 +1,6 @@
 # Wick's Trade Hall — Changelog
 
-## 1.0.4 — 2026-04-26
+## 1.0.4 - 2026-04-26
 
 ### Title bar slim revert + close-button glyph fix
 
@@ -10,7 +10,7 @@ Also: the previous `✕` (U+2715) close glyph was rendering as a tofu/missing-gl
 
 No functional changes.
 
-## 1.0.3 — 2026-04-25
+## 1.0.3 - 2026-04-25
 
 ### Title bar harmonization
 
@@ -18,7 +18,7 @@ Header now matches the canonical Wick suite spec — 32px tall, two-tone title (
 
 No functional changes.
 
-## 1.0.2 — 2026-04-21
+## 1.0.2 - 2026-04-21
 
 ### Brand identity pass
 

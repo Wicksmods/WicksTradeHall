@@ -11,4 +11,5 @@
 Core.lua
 Prices.lua
 Ledger.lua
+Board.lua
 UI.lua

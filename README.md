@@ -17,8 +17,17 @@ A session is persisted on every change, so a reload or a crash does not
 lose it. One left running for eight hours is forgotten rather than
 reported, because the numbers would mean nothing.
 
-**The trade board.** The trade channel as a categorised board rather than
-a wall of scroll. Not built yet; the tab says so.
+**The trade board.** The trade channel as a board rather than a wall of
+scroll. Seven categories, one line per person per subject, and anything
+nobody repeats for twenty minutes drops off. Channels with trade,
+commerce or services in the name are picked up on their own, and say and
+yell are read too because that is where a capital's bank steps trade.
+
+The classifier is keyword based and deliberately cautious. A message has
+to carry a trade signal at all, must not read like a group or guild
+advert, and then falls through an ordered set of rules. It is wrong
+sometimes; wrong into Misc is cheap, wrong into a category you are
+reading is not, which is why the blacklist runs first.
 
 ## About prices
 
@@ -39,6 +48,8 @@ ships item data, will close most of that gap.
 |---|---|
 | `/wth` | the window |
 | `/wth board` | the trade board |
+| `/wth clear` | empty the board |
+| `/wth channels` | which channels are being watched |
 | `/wth start` / `stop` / `reset` | the session by hand |
 | `/wth bar` | show or hide the session bar |
 | `/wth lock` / `unlock` | the bar's position |

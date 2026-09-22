@@ -142,6 +142,21 @@ A:RegisterSlash(function(_, msg)
     end
     if lower == "reset" then Ledger:Reset(); A:Print("session cleared.") return end
 
+    if lower == "clear" then
+        local n = ns.Board:Clear()
+        A:Print(("cleared %d listing%s."):format(n, n == 1 and "" or "s"))
+        return
+    end
+    if lower == "channels" then
+        local chans = ns.Board:Channels()
+        local any = false
+        for id, name in pairs(chans) do
+            any = true
+            A:Print(("  %d. %s%s"):format(id, name, ns.Board:Watching(id) and "  (watched)" or ""))
+        end
+        if not any then A:Print("no channels joined.") end
+        return
+    end
     if lower == "bar" then
         local db = A.db.profile
         db.showBar = not (db.showBar ~= false)
@@ -166,8 +181,13 @@ A:RegisterSlash(function(_, msg)
         end
         local h = Ledger:History()
         A:Print(("%d session%s in history."):format(#h, #h == 1 and "" or "s"))
+        local watched = 0
+        for id in pairs(ns.Board:Channels()) do if ns.Board:Watching(id) then watched = watched + 1 end end
+        A:Print(("board: %d listing%s from %d watched channel%s."):format(
+            #ns.Board.listings, #ns.Board.listings == 1 and "" or "s",
+            watched, watched == 1 and "" or "s"))
         return
     end
 
-    A:Print("commands: show | board | start | stop | reset | bar | lock | unlock | options | status")
+    A:Print("commands: show | board | start | stop | reset | clear | channels | bar | lock | unlock | options | status")
 end, "/wth", "/wtradehall")

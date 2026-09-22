@@ -59,8 +59,31 @@ function UI:BuildBar()
     local bg = Chrome:Texture(f, "BACKGROUND", C.voidBG); bg:SetAllPoints()
     Chrome:AddBorder(f)
 
+    -- Start and stop, on the bar. Auto mode covers instance runs, but
+    -- outside one there was no way to begin a session without the slash
+    -- command, which makes a tracker you cannot start an ornament.
+    local go = CreateFrame("Button", nil, f)
+    go:SetSize(16, 16)
+    go:SetPoint("LEFT", PAD, 0)
+    go.glyph = Chrome:Text(go, 12)
+    go.glyph:SetPoint("CENTER")
+    go:SetScript("OnClick", function()
+        if ns.Ledger.active then ns.Ledger:Stop() else ns.Ledger:Start() end
+        UI:RefreshBar()
+    end)
+    go:SetScript("OnEnter", function(s2)
+        GameTooltip:SetOwner(s2, "ANCHOR_BOTTOM")
+        GameTooltip:SetText(ns.Ledger.active and "Stop this session" or "Start a session", 1, 1, 1)
+        if ns.Ledger.active then
+            GameTooltip:AddLine("It is filed in history if it earned anything.", 0.5, 0.5, 0.5, true)
+        end
+        GameTooltip:Show()
+    end)
+    go:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f.go = go
+
     f.total = Chrome:Text(f, 12)
-    f.total:SetPoint("LEFT", PAD, 0)
+    f.total:SetPoint("LEFT", go, "RIGHT", 5, 0)
     f.total:SetJustifyH("LEFT")
 
     f.rate = Chrome:Text(f, 10, C.muted)
@@ -114,6 +137,10 @@ function UI:RefreshBar()
     local f = self.bar
     if not f or not f:IsShown() then return end
     local Lg, P = ns.Ledger, ns.Prices
+    if f.go then
+        -- A filled square to stop, an arrow to start.
+        f.go.glyph:SetText(Lg.active and "|cffE04B4B\226\150\160|r" or "|cff4FC778\226\150\182|r")
+    end
     if not Lg.active and (Lg.totalCopper or 0) == 0 then
         f.total:SetText("no session")
         tint(f.total, C.muted)
@@ -223,10 +250,46 @@ function UI:Refresh()
     for _, r in ipairs(p.rows) do r:Hide() end
 
     if self.tab == "board" then
+        local Bd = ns.Board
+        local counts = Bd:Counts()
+        local parts = {}
+        for _, cat in ipairs(Bd.ORDER) do
+            local n = counts[cat] or 0
+            if n > 0 then
+                local m = Bd.META[cat]
+                parts[#parts + 1] = ("|cff%02x%02x%02x%s %d|r"):format(
+                    m.color[1] * 255, m.color[2] * 255, m.color[3] * 255, m.short, n)
+            end
+        end
         p.summary:SetText("Trade board")
         tint(p.summary, C.text)
-        p.detail:SetText("")
-        p.note:SetText("Not built yet. The trade channel reader is the next piece: this client restricts sending to chat, not reading it, so the board works as it always did.")
+        p.detail:SetText(#parts > 0 and table.concat(parts, "   ") or "")
+
+        local list = Bd:Get(self.boardCat)
+        if #list == 0 then
+            local chans = 0
+            for id in pairs(Bd:Channels()) do if Bd:Watching(id) then chans = chans + 1 end end
+            p.note:SetText(chans > 0
+                and ("Watching %d channel%s. Nothing has come through yet."):format(chans, chans == 1 and "" or "s")
+                or "No trade channel found. Join one and it will be picked up.")
+            return
+        end
+        local now = time()
+        for i, l in ipairs(list) do
+            if i > 12 then break end
+            local r = row(p, i)
+            local m = Bd.META[l.category] or Bd.META.MISC
+            r.icon:SetTexture(nil)
+            r.left:SetText(("|cff%02x%02x%02x%s|r  %s: %s"):format(
+                m.color[1] * 255, m.color[2] * 255, m.color[3] * 255, m.short, l.name, l.message))
+            r.left:SetWordWrap(false)
+            tint(r.left, C.text)
+            local mins = math.floor((now - (l.lastSeen or now)) / 60)
+            r.right:SetText(mins < 1 and "now" or (mins .. "m"))
+            r:Show()
+        end
+        p.note:SetText(("%d listing%s. Anything unrepeated for twenty minutes drops off."):format(
+            #Bd.listings, #Bd.listings == 1 and "" or "s"))
         return
     end
 

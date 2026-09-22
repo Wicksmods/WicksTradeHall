@@ -20,4 +20,12 @@ umbrella Wick's Ledger folds into.
   Items repriced when the server answers late.
 - The session is kept out of the macro store: it is a running total, not
   a setting, and it would crowd out the settings that need to survive.
-- Trade board: the tab is there, the reader is not yet.
+- Trade board: the trade channel as a board. Seven categories, one line
+  per person per subject, anything nobody repeats for twenty minutes
+  drops off. Channels with trade, commerce or services in the name are
+  watched automatically; say and yell are read too, for the bank steps.
+  A group or guild advert is not a listing unless it says outright that
+  it is selling something. Item links read as the item's name.
+- The session bar has a start and stop button. Auto mode covers instance
+  runs, but outside one there was no way to begin a session without the
+  slash command.

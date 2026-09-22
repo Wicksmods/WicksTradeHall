@@ -20,7 +20,18 @@ ns.UI = UI
 local BAR_H, BAR_W, PAD = 24, 190, 6
 local ROW_H = 18
 
+local FILL = "Interface\\BUTTONS\\WHITE8X8"
+local STOP_RED = { 0.88, 0.29, 0.29, 1 }
+
 local function tint(fs, c) fs:SetTextColor(c[1], c[2], c[3], c[4] or 1) end
+
+-- A colour table as the hex an escape code wants. %x needs whole
+-- numbers and a palette is fractions, which threw the first time this
+-- drew a category label.
+local function hexOf(c)
+    return ("%02x%02x%02x"):format(math.floor(c[1] * 255 + 0.5),
+        math.floor(c[2] * 255 + 0.5), math.floor(c[3] * 255 + 0.5))
+end
 
 local function elapsedText(sec)
     local h = math.floor(sec / 3600)
@@ -65,8 +76,28 @@ function UI:BuildBar()
     local go = CreateFrame("Button", nil, f)
     go:SetSize(16, 16)
     go:SetPoint("LEFT", PAD, 0)
-    go.glyph = Chrome:Text(go, 12)
-    go.glyph:SetPoint("CENTER")
+    -- Drawn, not typed. A play triangle and a stop square as text meant
+    -- U+25B6 and U+25A0, and this client's font has neither, so the bar
+    -- showed an empty box. These are built from a flat texture the client
+    -- certainly has: the same one the health bar overlay in Comforts uses.
+    go.rows = {}
+    for i = 1, 8 do
+        local t = go:CreateTexture(nil, "ARTWORK")
+        t:SetTexture(FILL)
+        t:SetHeight(2)
+        t:SetPoint("LEFT", go, "LEFT", 3, 7 - (i - 1) * 2)
+        go.rows[i] = t
+    end
+
+    -- A right-pointing triangle is rows that widen towards the middle; a
+    -- square is rows of one width. The same eight textures do both.
+    local TRIANGLE = { 2, 5, 8, 10, 10, 8, 5, 2 }
+    function go:SetShape(playing, c)
+        for i, t in ipairs(self.rows) do
+            t:SetWidth(playing and 10 or TRIANGLE[i])
+            t:SetColorTexture(c[1], c[2], c[3], 1)
+        end
+    end
     go:SetScript("OnClick", function()
         if ns.Ledger.active then ns.Ledger:Stop() else ns.Ledger:Start() end
         UI:RefreshBar()
@@ -138,8 +169,8 @@ function UI:RefreshBar()
     if not f or not f:IsShown() then return end
     local Lg, P = ns.Ledger, ns.Prices
     if f.go then
-        -- A filled square to stop, an arrow to start.
-        f.go.glyph:SetText(Lg.active and "|cffE04B4B\226\150\160|r" or "|cff4FC778\226\150\182|r")
+        -- A square to stop it, a triangle to start it.
+        f.go:SetShape(Lg.active, Lg.active and STOP_RED or C.fel)
     end
     if not Lg.active and (Lg.totalCopper or 0) == 0 then
         f.total:SetText("no session")
@@ -225,12 +256,18 @@ local function row(p, i)
     r.icon:SetSize(14, 14)
     r.icon:SetPoint("LEFT")
     r.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    r.left = Chrome:Text(r, 11)
-    r.left:SetPoint("LEFT", r.icon, "RIGHT", 5, 0)
-    r.left:SetJustifyH("LEFT")
     r.right = Chrome:Text(r, 11, C.muted)
     r.right:SetPoint("RIGHT")
+    r.right:SetWidth(42)
     r.right:SetJustifyH("RIGHT")
+    r.left = Chrome:Text(r, 11)
+    r.left:SetPoint("LEFT", r.icon, "RIGHT", 5, 0)
+    -- Bounded on the right, or a long trade advert runs off the panel and
+    -- over whatever is behind it. One line, cut where the age begins.
+    r.left:SetPoint("RIGHT", r.right, "LEFT", -6, 0)
+    r.left:SetJustifyH("LEFT")
+    r.left:SetWordWrap(false)
+    if r.left.SetMaxLines then r.left:SetMaxLines(1) end
     p.rows[i] = r
     return r
 end
@@ -247,7 +284,10 @@ function UI:Refresh()
     if not p or not p:IsShown() then return end
     local Lg, P = ns.Ledger, ns.Prices
 
-    for _, r in ipairs(p.rows) do r:Hide() end
+    for _, r in ipairs(p.rows) do
+        r:Hide()
+        r.icon:SetWidth(14)
+    end
 
     if self.tab == "board" then
         local Bd = ns.Board
@@ -257,8 +297,7 @@ function UI:Refresh()
             local n = counts[cat] or 0
             if n > 0 then
                 local m = Bd.META[cat]
-                parts[#parts + 1] = ("|cff%02x%02x%02x%s %d|r"):format(
-                    m.color[1] * 255, m.color[2] * 255, m.color[3] * 255, m.short, n)
+                parts[#parts + 1] = ("|cff%s%s %d|r"):format(hexOf(m.color), m.short, n)
             end
         end
         p.summary:SetText("Trade board")
@@ -279,9 +318,10 @@ function UI:Refresh()
             if i > 12 then break end
             local r = row(p, i)
             local m = Bd.META[l.category] or Bd.META.MISC
+            -- No icon on a listing: take the gap back for the text.
             r.icon:SetTexture(nil)
-            r.left:SetText(("|cff%02x%02x%02x%s|r  %s: %s"):format(
-                m.color[1] * 255, m.color[2] * 255, m.color[3] * 255, m.short, l.name, l.message))
+            r.icon:SetWidth(0.001)
+            r.left:SetText(("|cff%s%s|r  %s: %s"):format(hexOf(m.color), m.short, l.name, l.message))
             r.left:SetWordWrap(false)
             tint(r.left, C.text)
             local mins = math.floor((now - (l.lastSeen or now)) / 60)

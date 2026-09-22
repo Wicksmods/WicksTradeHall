@@ -341,7 +341,8 @@ function L:Init()
     ns:On("PLAYER_ENTERING_WORLD", function()
         local p = ns.db and ns.db.profile
         if not p or not p.autoMode then return end
-        local inInstance, kind = IsInInstance and IsInInstance()
+        if not IsInInstance then return end
+        local inInstance = IsInInstance()
         if inInstance and not L.active then
             if p.hardLock and db() and db().session then L:Resume() else L:Start() end
         elseif not inInstance and L.active then

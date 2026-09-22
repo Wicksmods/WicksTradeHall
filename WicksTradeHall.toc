@@ -1,0 +1,14 @@
+## Interface: 16001
+## Title: Wick's Trade Hall
+## Notes: Economy for World of Warcraft: Forever. Session earnings with gold per hour, and the trade channel as a board.
+## Author: Wick
+## Version: 0.1.0
+## Dependencies: WickCore
+## SavedVariables: WicksTradeHallSaved
+## X-Website: https://wicksmods.com
+## X-WickCore: WickCore-1.0
+
+Core.lua
+Prices.lua
+Ledger.lua
+UI.lua

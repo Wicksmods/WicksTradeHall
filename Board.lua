@@ -101,7 +101,8 @@ local TRADE_SIGNAL = wordSet(
     "transmute arcanite mooncloth flask elixir potion gem cut gems socket " ..
     "recipe pattern formula schematic plans design " ..
     "boe epic rare legendary gear armor weapon " ..
-    "service services can do your will make tip tips")
+    "service services can do your will make tip tips " ..
+    "enchanter enchants enchantment mats materials")
 
 local BLACKLIST = wordSet(
     "lfg lfr lf1m lf2m lf3m lfm " ..
@@ -119,8 +120,23 @@ local WTB_STRONG = wordSet("wtb buying buy")
 local WTB_WEAK = wordSet("lf looking need want iso")
 local WTB_REINFORCE = wordSet("gold cod price paying pay pst recipe pattern formula schematic plans boe epic rare gear armor weapon gem flask elixir potion")
 local WTT_WORDS = wordSet("wtt trade trading swap swapping exchange")
-local ENCH_WORDS = wordSet("enchant enchanting enchants enchanter crusader fiery icy chill lifestealing agility strength spirit healing 2h weapon chest boots bracer cloak gloves")
-local ENCH_CONTEXT = wordSet("tip tips free service services can do your will")
+-- Split, because pooling these was wrong twice over. "Enchanting in
+-- Undercity" is the commonest enchant advert there is and it fell into
+-- Misc, because the whole set needed a service word alongside it. And
+-- "gloves" on its own could carry a message into Enchanting, which is
+-- the opposite mistake.
+--
+-- A word that can only mean enchanting is enough by itself. A word that
+-- merely might, a slot or a stat or a formula name, still needs company.
+local ENCH_STRONG = wordSet("enchant enchants enchanting enchanter enchanters ench enchantment enchantments")
+local ENCH_WEAK = wordSet(
+    "crusader fiery icy chill lifestealing demonslaying " ..
+    "agility strength spirit stamina intellect healing spellpower " ..
+    "2h weapon chest boots bracer bracers cloak gloves shield " ..
+    "formula scroll rod runed")
+-- Service words only. Widening this to wts/lf/gold was tempting and
+-- wrong: it would have read "WTS gloves cheap" as an enchant.
+local ENCH_CONTEXT = wordSet("tip tips free service services can do your will make lfw")
 local CRAFT_WORDS = wordSet(
     "craft crafting crafter crafts blacksmithing blacksmith bs tailoring tailor " ..
     "leatherworking leatherworker lw alchemy alchemist engineering engineer engi " ..
@@ -136,8 +152,11 @@ local TRAVEL_CONTEXT = wordSet("mage warlock lock tip tips free pst")
 local RULES = {
     { cat = "WTT", fn = function(t) return containsAny(t, WTT_WORDS) end },
     { cat = "ENCHANT", fn = function(t)
-        if containsAny(t, ENCH_WORDS) and containsAny(t, ENCH_CONTEXT) then return true end
-        return t:find("enchant") and (t:find("service") or t:find("free") or t:find("tip")) and true or false
+        -- Says enchanting outright: that is the subject, whichever
+        -- direction the message is going. Someone advertising and
+        -- someone looking both belong on the same shelf.
+        if containsAny(t, ENCH_STRONG) then return true end
+        return containsAny(t, ENCH_WEAK) and containsAny(t, ENCH_CONTEXT)
     end },
     { cat = "TRAVEL", fn = function(t)
         if containsAny(t, TRAVEL_WORDS) and containsAny(t, TRAVEL_CONTEXT) then return true end

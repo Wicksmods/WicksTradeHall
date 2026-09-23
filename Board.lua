@@ -183,11 +183,18 @@ local CRAFT_WORDS = wordSet(
     "transmute arcanite mooncloth flask flasks elixir elixirs potion potions gem gems cut socket")
 local CRAFT_CONTEXT = wordSet("tip tips service services can do your will make recipe recipes pattern formula schematic plans design have")
 -- Classic cities, not the TBC list this came from.
-local TRAVEL_WORDS = wordSet(
-    "port portal ports portals porting summon summons summoning taxi ride " ..
+-- Split for the same reason the enchant words were. A taxi is a taxi; a
+-- city name on its own means nothing, because half of trade chat says
+-- where it is standing. Pooled, "< Taxi Service > Undercity, Thunder
+-- Bluff 50silver" fell into Misc, because the rule wanted a mage or a tip
+-- alongside and there was neither.
+local TRAVEL_STRONG = wordSet(
+    "port portal ports portals porting summon summons summoning sum sums " ..
+    "taxi taxis ride rides ferry")
+local TRAVEL_WEAK = wordSet(
     "stormwind ironforge darnassus orgrimmar undercity thunderbluff " ..
-    "moonglade dalaran stonard theramore booty")
-local TRAVEL_CONTEXT = wordSet("mage warlock lock tip tips free pst")
+    "thunder bluff moonglade dalaran stonard theramore booty")
+local TRAVEL_CONTEXT = wordSet("mage warlock lock tip tips free pst service services")
 
 local RULES = {
     { cat = "WTT", fn = function(t) return containsAny(t, WTT_WORDS) end },
@@ -199,8 +206,9 @@ local RULES = {
         return containsAny(t, ENCH_WEAK) and containsAny(t, ENCH_CONTEXT)
     end },
     { cat = "TRAVEL", fn = function(t)
-        if containsAny(t, TRAVEL_WORDS) and containsAny(t, TRAVEL_CONTEXT) then return true end
-        return containsAny(t, TRAVEL_WORDS) and (t:find("port") or t:find("summon")) and true or false
+        -- A word that can only mean getting somewhere is enough on its own.
+        if containsAny(t, TRAVEL_STRONG) then return true end
+        return containsAny(t, TRAVEL_WEAK) and containsAny(t, TRAVEL_CONTEXT)
     end },
     { cat = "CRAFT", fn = function(t)
         return containsAny(t, CRAFT_WORDS) and containsAny(t, CRAFT_CONTEXT)

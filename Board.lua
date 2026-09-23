@@ -13,6 +13,7 @@
 -- are reading is not, which is why the blacklist runs before the rules.
 
 local ADDON, ns = ...
+if not WickCore then return end   -- said once in Core.lua
 local Core = WickCore
 
 local B = {}

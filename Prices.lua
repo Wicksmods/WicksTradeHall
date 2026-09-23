@@ -13,6 +13,7 @@
 -- an unpriced item is counted as zero and says so rather than guessing.
 
 local ADDON, ns = ...
+if not WickCore then return end   -- said once in Core.lua
 local Core = WickCore
 local D = Core.Dialect
 

@@ -15,6 +15,7 @@
 -- the budget that keeps the real settings alive.
 
 local ADDON, ns = ...
+if not WickCore then return end   -- said once in Core.lua
 local Core = WickCore
 local D = Core.Dialect
 

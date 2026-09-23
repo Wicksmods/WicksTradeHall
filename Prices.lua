@@ -23,6 +23,28 @@ ns.Prices = P
 -- itemID -> copper. Generated alongside the gear data; absent for now.
 ns.VENDOR = ns.VENDOR or {}
 
+-- The client answers about an item it has met and stays quiet about one
+-- it has not, which is exactly the case a fresh drop is. It will go and
+-- fetch it if asked, and the ledger already listens for the answer and
+-- reprices, but nothing was asking: the question was never put, so the
+-- answer never came and most loot sat at zero for the whole session.
+--
+-- Asked once each. A second ask for the same item is pointless whether
+-- or not the first is still in flight.
+local asked = {}
+
+function P:Request(itemID)
+    if not itemID or asked[itemID] then return false end
+    asked[itemID] = true
+    local fn = C_Item and C_Item.RequestLoadItemDataByID
+    if not fn then return false end
+    return (pcall(fn, itemID))
+end
+
+-- Only for a fresh session: the same item can be worth asking about again
+-- on a later run, and the table would otherwise grow all night.
+function P:ForgetAsked() asked = {} end
+
 -- copper, source. source is one of "vendor", "shipped", "unknown", and
 -- the UI shows it so a total is never mistaken for more than it is.
 function P:Get(itemID)
@@ -35,6 +57,8 @@ function P:Get(itemID)
     if type(shipped) == "number" and shipped > 0 then
         return shipped, "shipped"
     end
+    -- Put the question, so the answer has somewhere to come from.
+    self:Request(itemID)
     return 0, "unknown"
 end
 

@@ -60,6 +60,45 @@ local function stripLinks(msg)
 end
 B.StripLinks = stripLinks
 
+-- The first item a listing names, so the row can show what it is about
+-- rather than only who said it. The link is kept whole for the tooltip and
+-- for putting in chat; the id is what the icon is looked up with.
+function B:FirstItem(raw)
+    if not raw then return nil end
+    local link = raw:match("(|c%x+|Hitem:.-|h.-|h|r)") or raw:match("(|Hitem:.-|h.-|h)")
+    if not link then return nil end
+    local id = tonumber(link:match("|Hitem:(%d+)"))
+    if not id then return link, nil, nil end
+    local icon
+    local info = Core.Dialect.GetItemInfo(id)
+    if info then icon = info.icon end
+    if not icon and C_Item and C_Item.RequestLoadItemDataByID then
+        -- Same as the ledger: the client answers about an item it has met
+        -- and fetches one it has not, if asked.
+        pcall(C_Item.RequestLoadItemDataByID, id)
+    end
+    return link, id, icon
+end
+
+-- Newest first, narrowed by category and by what is typed in the search
+-- box. Both are plain substring matches over the player and the message,
+-- which is what someone scanning a trade channel actually wants.
+function B:Filter(category, search)
+    local out = {}
+    search = search and search:lower()
+    if search == "" then search = nil end
+    for _, l in ipairs(self.listings) do
+        local ok = true
+        if category and category ~= "ALL" and l.category ~= category then ok = false end
+        if ok and search then
+            ok = (l.message or ""):lower():find(search, 1, true) ~= nil
+                or (l.name or ""):lower():find(search, 1, true) ~= nil
+        end
+        if ok then out[#out + 1] = l end
+    end
+    return out
+end
+
 -- Rough sameness, for catching a person reposting the same advert with
 -- one word changed. Word overlap is enough and is cheap.
 local function similarity(a, b)

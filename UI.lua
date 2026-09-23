@@ -18,6 +18,10 @@ local C = Chrome.Colors
 local UI = {}
 ns.UI = UI
 
+-- Board.lua loads before this one, so the categories are here to build the
+-- filter strip with rather than only inside Refresh.
+local Bd = ns.Board
+
 local BAR_H, BAR_W, PAD = 24, 190, 6
 local ROW_H = 18
 
@@ -235,6 +239,43 @@ function UI:Build()
     p.detail:SetPoint("TOPRIGHT", 0, -20)
     p.detail:SetJustifyH("LEFT")
 
+    -- The board's own strip: a button per category and a search box. Built
+    -- with the panel and simply hidden on the ledger tab, so switching tabs
+    -- costs nothing.
+    p.filters = {}
+    local fx = 0
+    local function filterBtn(key, label, w)
+        local b = Chrome:Button(p.body, label, w, 16)
+        b:SetPoint("TOPLEFT", fx, -22)
+        fx = fx + w + 3
+        b:SetScript("OnClick", function()
+            UI.boardCat = (key ~= "ALL") and key or nil
+            UI:Refresh()
+        end)
+        p.filters[key] = b
+        return b
+    end
+    filterBtn("ALL", "All", 30)
+    for _, key in ipairs(Bd.ORDER) do
+        filterBtn(key, (Bd.META[key] or {}).short or key, 38)
+    end
+
+    local search = CreateFrame("EditBox", nil, p.body)
+    search:SetSize(110, 16)
+    search:SetPoint("TOPRIGHT", 0, -22)
+    search:SetAutoFocus(false)
+    search:SetFontObject("GameFontHighlightSmall")
+    search:SetTextInsets(4, 4, 0, 0)
+    Chrome:Texture(search, "BACKGROUND", C.shadow):SetAllPoints()
+    Chrome:AddBorder(search)
+    search:SetScript("OnTextChanged", function(e) UI.boardSearch = e:GetText(); UI:Refresh() end)
+    search:SetScript("OnEscapePressed", function(e) e:SetText(""); e:ClearFocus() end)
+    search:SetScript("OnEnterPressed", function(e) e:ClearFocus() end)
+    p.search = search
+    p.searchHint = Chrome:Text(search, 10, C.muted)
+    p.searchHint:SetPoint("LEFT", 5, 0)
+    p.searchHint:SetText("search")
+
     p.rows = {}
     p.note = Chrome:Text(p.body, 11, C.muted)
     p.note:SetPoint("BOTTOMLEFT", 0, 4)
@@ -244,6 +285,94 @@ function UI:Build()
 
     p:SetScript("OnShow", function() UI:Refresh() end)
     return p
+end
+
+-- Older adverts fade. A board where everything shouts equally loudly is
+-- the scroll it is meant to replace.
+local function ageAlpha(seconds)
+    if seconds < 120 then return 1 end
+    if seconds > 900 then return 0.45 end
+    return 1 - 0.55 * ((seconds - 120) / 780)
+end
+
+local BOARD_ROW_H = 26
+
+local function boardRow(p, i)
+    p.brows = p.brows or {}
+    local r = p.brows[i]
+    if r then return r end
+    r = CreateFrame("Button", nil, p.body)
+    r:SetHeight(BOARD_ROW_H)
+    r:SetPoint("TOPLEFT", 0, -44 - (i - 1) * BOARD_ROW_H)
+    r:SetPoint("TOPRIGHT", 0, -44 - (i - 1) * BOARD_ROW_H)
+    r:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+    r.stripe = Chrome:Texture(r, "BACKGROUND", C.shadow)
+    r.stripe:SetAllPoints()
+    r.stripe:SetAlpha(0.35)
+    r.hl = Chrome:Texture(r, "HIGHLIGHT", C.border)
+    r.hl:SetAllPoints()
+    r.hl:SetAlpha(0.25)
+
+    -- Category badge: a tinted box, the way the TBC board had it, so the
+    -- kind of advert reads before the words do.
+    r.badge = CreateFrame("Frame", nil, r)
+    r.badge:SetSize(40, 14)
+    r.badge:SetPoint("LEFT", 2, 0)
+    r.badgeBg = Chrome:Texture(r.badge, "BACKGROUND")
+    r.badgeBg:SetAllPoints()
+    r.badgeText = Chrome:Text(r.badge, 9)
+    r.badgeText:SetPoint("CENTER")
+
+    r.icon = r:CreateTexture(nil, "ARTWORK")
+    r.icon:SetSize(16, 16)
+    r.icon:SetPoint("LEFT", 46, 0)
+    r.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+
+    r.age = Chrome:Text(r, 10, C.muted)
+    r.age:SetPoint("TOPRIGHT", -2, -3)
+    r.age:SetJustifyH("RIGHT")
+    r.age:SetWidth(34)
+
+    r.who = Chrome:Text(r, 11, C.fel)
+    r.who:SetPoint("TOPLEFT", 66, -2)
+    r.who:SetJustifyH("LEFT")
+    r.who:SetWordWrap(false)
+    r.who:SetPoint("RIGHT", r.age, "LEFT", -4, 0)
+
+    r.msg = Chrome:Text(r, 10, C.muted)
+    r.msg:SetPoint("TOPLEFT", 66, -13)
+    r.msg:SetPoint("RIGHT", -2, 0)
+    r.msg:SetJustifyH("LEFT")
+    r.msg:SetWordWrap(false)
+    if r.msg.SetMaxLines then r.msg:SetMaxLines(1) end
+
+    r:SetScript("OnEnter", function(self)
+        if not self.link then return end
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        if not pcall(GameTooltip.SetHyperlink, GameTooltip, self.link) then
+            GameTooltip:ClearLines()
+            GameTooltip:AddLine(self.link)
+        end
+        GameTooltip:Show()
+    end)
+    r:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+    r:SetScript("OnClick", function(self, button)
+        -- Shift to put the item in chat, right-click to open a whisper.
+        -- Neither sends anything: posting is restricted on this client, so
+        -- the most it does is fill the box and leave it to the player.
+        if IsShiftKeyDown and IsShiftKeyDown() and self.link and ChatEdit_InsertLink then
+            ChatEdit_InsertLink(self.link)
+            return
+        end
+        if button == "RightButton" and self.who_full and ChatFrame_OpenChat then
+            ChatFrame_OpenChat("/w " .. self.who_full .. " ")
+        end
+    end)
+
+    p.brows[i] = r
+    return r
 end
 
 local function row(p, i)
@@ -291,48 +420,79 @@ function UI:Refresh()
     end
 
     if self.tab == "board" then
-        local Bd = ns.Board
-        local counts = Bd:Counts()
-        local parts = {}
-        for _, cat in ipairs(Bd.ORDER) do
-            local n = counts[cat] or 0
-            if n > 0 then
-                local m = Bd.META[cat]
-                parts[#parts + 1] = ("|cff%s%s %d|r"):format(hexOf(m.color), m.short, n)
-            end
-        end
+        -- The strip belongs to this tab only.
+        for _, b in pairs(p.filters) do b:Show() end
+        p.search:Show()
+        p.searchHint:SetShown((p.search:GetText() or "") == "")
         p.summary:SetText("Trade board")
         tint(p.summary, C.text)
-        p.detail:SetText(#parts > 0 and table.concat(parts, "   ") or "")
+        p.detail:SetText("")
 
-        local list = Bd:Get(self.boardCat)
-        if #list == 0 then
-            local chans = 0
-            for id in pairs(Bd:Channels()) do if Bd:Watching(id) then chans = chans + 1 end end
-            p.note:SetText(chans > 0
-                and ("Watching %d channel%s. Nothing has come through yet."):format(chans, chans == 1 and "" or "s")
-                or "No trade channel found. Join one and it will be picked up.")
-            return
-        end
         local now = time()
-        for i, l in ipairs(list) do
-            if i > 12 then break end
-            local r = row(p, i)
+        local list = Bd:Filter(self.boardCat, self.boardSearch)
+
+        -- Mark which filter is on, so the board says what it is showing.
+        for key, b in pairs(p.filters) do
+            local on = (key == "ALL" and self.boardCat == nil) or key == self.boardCat
+            if b.SetAlpha then b:SetAlpha(on and 1 or 0.55) end
+        end
+
+        for _, r in ipairs(p.rows) do r:Hide() end
+        for _, r in ipairs(p.brows or {}) do r:Hide() end
+
+        local room = math.max(1, math.floor(((tonumber(p.body:GetHeight()) or 200) - 66) / BOARD_ROW_H))
+        for i = 1, math.min(#list, room) do
+            local l = list[i]
+            local r = boardRow(p, i)
             local m = Bd.META[l.category] or Bd.META.MISC
-            -- No icon on a listing: take the gap back for the text.
-            r.icon:SetTexture(nil)
-            r.icon:SetWidth(0.001)
-            r.left:SetText(("|cff%s%s|r  %s: %s"):format(hexOf(m.color), m.short, l.name, l.message))
-            r.left:SetWordWrap(false)
-            tint(r.left, C.text)
-            local mins = math.floor((now - (l.lastSeen or now)) / 60)
-            r.right:SetText(mins < 1 and "now" or (mins .. "m"))
+            local c = m.color
+
+            r.badgeBg:SetColorTexture(c[1], c[2], c[3], 0.18)
+            r.badgeText:SetText(m.short)
+            r.badgeText:SetTextColor(c[1], c[2], c[3], 1)
+
+            local link, _, icon = Bd:FirstItem(l.raw)
+            r.link = link
+            if icon then
+                r.icon:SetTexture(icon)
+                r.icon:Show()
+                r.who:SetPoint("TOPLEFT", 66, -2)
+                r.msg:SetPoint("TOPLEFT", 66, -13)
+            else
+                r.icon:Hide()
+                r.who:SetPoint("TOPLEFT", 48, -2)
+                r.msg:SetPoint("TOPLEFT", 48, -13)
+            end
+
+            r.who:SetText(l.name or "?")
+            r.who_full = l.fullName or l.name
+            r.msg:SetText(l.message or "")
+
+            local age = now - (l.lastSeen or now)
+            local mins = math.floor(age / 60)
+            r.age:SetText(mins < 1 and "now" or (mins .. "m"))
+            r:SetAlpha(ageAlpha(age))
+            r.stripe:SetShown(i % 2 == 0)
             r:Show()
         end
-        p.note:SetText(("%d listing%s. Anything unrepeated for twenty minutes drops off."):format(
-            #Bd.listings, #Bd.listings == 1 and "" or "s"))
+
+        local shown = math.min(#list, room)
+        if #Bd.listings == 0 then
+            p.note:SetText("Nothing yet. The board fills from the trade channels you are in.")
+        elseif #list == 0 then
+            p.note:SetText("Nothing matches. Clear the search or pick All.")
+        else
+            p.note:SetText(("%d of %d listing%s%s. Right-click to whisper, shift-click to link. Anything unrepeated for twenty minutes drops off."):format(
+                shown, #Bd.listings, #Bd.listings == 1 and "" or "s",
+                shown < #list and (", " .. (#list - shown) .. " more below") or ""))
+        end
         return
     end
+
+    -- The ledger tab has no use for the board's strip.
+    for _, b in pairs(p.filters) do b:Hide() end
+    p.search:Hide()
+    p.searchHint:Hide()
 
     if not Lg.active and (Lg.totalCopper or 0) == 0 then
         p.summary:SetText("No session")

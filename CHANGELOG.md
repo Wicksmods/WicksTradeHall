@@ -1,5 +1,25 @@
 # Wick's Trade Hall (Forever) - Changelog
 
+## 0.9.1
+
+### The board reads as a board
+
+Every listing carries a category badge and the icon of the first item it
+names, with filters along the top, a search box, and an age that fades as
+it gets old. Right-click a line to open a whisper, shift-click to put the
+item in your chat box. Neither sends anything: posting is restricted on
+this client.
+
+### Fixed
+
+- A taxi or a summon reads as travel rather than falling into Misc. The
+  words that can only mean getting somewhere now classify on their own,
+  while a city name still needs company, because half the channel says
+  where it is standing while selling ore.
+- The session total was counting most loot as nothing. It listened for
+  the client to answer about an item but never asked, and a fresh drop is
+  exactly the case the client stays quiet about.
+
 ## 0.9.0
 
 One version across the suite for the Forever beta. Every addon carried a

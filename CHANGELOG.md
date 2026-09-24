@@ -2,7 +2,13 @@
 
 ## 0.9.2 — 2026-09-24
 
-- (edit this entry with the actual changes)
+### Fixed
+
+- The board no longer fills your chat with errors during a fight. The
+  client hands an addon the text of a chat line as something it is not
+  allowed to read while restrictions are up, and the board was reading
+  it. Lines said during a fight are skipped instead.
+- The same guard covers the session tracker, which reads loot lines.
 
 ## 0.9.1
 

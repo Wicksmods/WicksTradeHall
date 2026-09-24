@@ -15,6 +15,7 @@
 local ADDON, ns = ...
 if not WickCore then return end   -- said once in Core.lua
 local Core = WickCore
+local R = Core and Core.Restrict
 
 local B = {}
 ns.Board = B
@@ -358,7 +359,15 @@ end
 -- ============================================================
 
 function B:Handle(msg, author, channelID)
-    if not msg or msg == "" or not author then return false end
+    if not msg or not author then return false end
+    -- The client hands a tainted addon a secret string for the message
+    -- body while restrictions are up. A secret can be rendered but not
+    -- compared or matched, and everything below does one or the other:
+    -- the category comes from matching words in the text. So a secret
+    -- line is skipped rather than crashed on, which costs the board the
+    -- lines said during a fight and nothing else.
+    if R and (R:IsSecret(msg) or R:IsSecret(author)) then return false end
+    if msg == "" then return false end
     if channelID and not self:Watching(channelID) then return false end
     -- Classify on the text, not the markup: an item link should read as
     -- the item's name.

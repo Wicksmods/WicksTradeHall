@@ -18,6 +18,7 @@ local ADDON, ns = ...
 if not WickCore then return end   -- said once in Core.lua
 local Core = WickCore
 local D = Core.Dialect
+local R = Core.Restrict
 
 local L = {}
 ns.Ledger = L
@@ -253,6 +254,9 @@ end
 
 function L:AddLoot(msg)
     if not self.active then return false end
+    -- Same as the board: a loot line arrives secret under restrictions,
+    -- and pulling an item out of it is matching, which a secret refuses.
+    if not msg or (R and R:IsSecret(msg)) then return false end
     local itemID, link, count = self:ParseLoot(msg)
     if not itemID then return false end
 

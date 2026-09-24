@@ -1,5 +1,9 @@
 # Wick's Trade Hall (Forever) - Changelog
 
+## 0.9.2 — 2026-09-24
+
+- (edit this entry with the actual changes)
+
 ## 0.9.1
 
 ### The board reads as a board
